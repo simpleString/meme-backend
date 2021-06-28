@@ -11,4 +11,7 @@ export class User {
 
   @ManyToMany(() => Chat, (chat) => chat.users)
   chats: Chat[];
+
+  @Column({ type: 'boolean', default: false })
+  isActive: boolean;
 }

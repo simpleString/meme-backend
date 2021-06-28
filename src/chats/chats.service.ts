@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 
 import { CreateChatDto } from './dto/create-chat.dto';
@@ -11,32 +11,40 @@ import { Chat } from './entities/chat.entity';
 export class ChatsService {
   constructor(
     @InjectRepository(Chat) private readonly chatRepository: Repository<Chat>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly usersService: UsersService,
   ) {}
 
   async create(createChatDto: CreateChatDto) {
-    let users: User[] = await this.userRepository.findByIds(
-      createChatDto.users,
-    );
-    console.log(users);
-    const chat = await this.getChatByUsers(users);
-    const newChat = this.chatRepository.create({ users });
-    const test = await this.userRepository.save(newChat);
-    console.log(chat);
-    console.log(newChat);
-    return test;
+    const chat = await this.getChatByUsersId(...createChatDto.users);
+    if (chat)
+      throw new HttpException('Chat already exists', HttpStatus.BAD_REQUEST);
+    const users = await this.usersService.getUsersByIds(createChatDto.users);
+    const newChat = this.chatRepository.create(users);
+    return await this.chatRepository.save(newChat);
   }
 
-  getChatByUsers(users: any[]) {
-    return this.chatRepository.findOne();
+  getChatByUsersId(user1Id: string, user2Id: string) {
+    const chatSubquery = this.chatRepository
+      .createQueryBuilder('innerChat')
+      .select('innerChat.id')
+      .leftJoin('innerChat.users', 'innerUser')
+      .where('innerUser.id = :innerId');
+
+    return this.chatRepository
+      .createQueryBuilder('chat')
+      .leftJoin('chat.users', 'user')
+      .where('user.id = :id', { id: user1Id })
+      .andWhere('chat.id = ' + '(' + chatSubquery.getQuery() + ')')
+      .setParameter('innerId', user2Id)
+      .getMany();
   }
 
   findAll() {
     this.chatRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} chat`;
+  findOne(id: string) {
+    return this.chatRepository.findOne(id);
   }
 
   update(id: number, updateChatDto: UpdateChatDto) {
