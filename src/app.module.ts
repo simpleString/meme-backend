@@ -14,19 +14,25 @@ import { AuthModule } from './auth/auth.module';
 import { MessagesModule } from './messages/messages.module';
 import { Message } from './messages/entities/message.entity';
 import { Token } from './auth/entities/token.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'backend',
-      entities: [User, Chat, Message, Token],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: 'localhost',
+        port: configService.get<number>('PORT'),
+        username: 'postgres',
+        password: 'postgres',
+        database: 'backend',
+        entities: [User, Chat, Message, Token],
+        synchronize: true,
+      }),
     }),
+    ConfigModule.forRoot(),
     UsersModule,
     ChatsModule,
     AuthModule,

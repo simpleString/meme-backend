@@ -19,8 +19,8 @@ export class ChatsService {
     if (chat)
       throw new HttpException('Chat already exists', HttpStatus.BAD_REQUEST);
     const users = await this.usersService.getUsersByIds(createChatDto.users);
-    const newChat = this.chatRepository.create(users);
-    return await this.chatRepository.save(newChat);
+    // const newChat = this.chatRepository.create(users);
+    // return await this.chatRepository.save(newChat);
   }
 
   getChatByUsersId(user1Id: string, user2Id: string) {
