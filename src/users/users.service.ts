@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PostgresErrorCode } from 'src/database/PostgressCodes';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
@@ -13,12 +14,29 @@ export class UsersService {
   getUsersByIds(users: string[]) {
     return this.userRepository.findByIds(users);
   }
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     try {
       const user = this.userRepository.create(createUserDto);
-      return this.userRepository.save(user);
+      return await this.userRepository.save(user);
     } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      if (error?.code == PostgresErrorCode.UniqueViolation) {
+        throw new HttpException(
+          'This phone already used',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
+  }
+
+  async getUserByPhone(phone: string) {
+    return await this.userRepository.findOne({ where: { phone } });
+  }
+
+  async getUserById(userId: string) {
+    return await this.userRepository.findOne(userId);
   }
 }

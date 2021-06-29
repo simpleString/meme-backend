@@ -1,6 +1,7 @@
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -15,7 +16,13 @@ export class Token {
   @Column({ nullable: false })
   refreshToken: string;
 
+  @Column()
+  userId: string;
+
   @ManyToOne(() => User)
-  @JoinColumn()
+  @JoinColumn({ name: 'userId' })
   user: User;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }
