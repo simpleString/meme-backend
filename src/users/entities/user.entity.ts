@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { IsMobilePhone } from 'class-validator';
 import { Chat } from 'src/chats/entities/chat.entity';
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
@@ -12,10 +13,8 @@ export class User {
   phone: string;
 
   @Column()
+  @Exclude()
   password: string;
-
-  @ManyToMany(() => Chat, (chat) => chat.users)
-  chats: Chat[];
 
   @Column({ type: 'boolean', default: false })
   isActive: boolean;

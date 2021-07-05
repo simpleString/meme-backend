@@ -1,18 +1,35 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
+import { Message } from 'src/messages/entities/message.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
-  CreateDateColumn,
+  BaseEntity,
+  Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Participant } from './participant.entity';
 
 @Entity('chat')
-export class Chat {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+export class Chat extends BaseEntity {
+  @ApiProperty()
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @ManyToMany(() => User, (user) => user.chats)
-  @JoinTable()
-  users: User[];
+  @ApiProperty()
+  @OneToMany(() => Participant, (participant) => participant.chat)
+  participants: Participant[];
+
+  @Column({ nullable: true })
+  lastMsgId: string;
+
+  @ApiProperty()
+  @ManyToOne(() => Message, { nullable: true })
+  @JoinColumn({ name: 'lastMsgId' })
+  lastMsg: Message;
 }

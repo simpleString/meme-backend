@@ -1,51 +1,62 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { MessagesService } from './messages.service';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { RequestWithUser } from 'src/auth/interfaces/requestWithUser.interface';
+
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Message } from './entities/message.entity';
+import { MessagesService } from './messages.service';
 
 @ApiTags('messages')
+@UseGuards(JwtAuthGuard)
 @Controller('messages')
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED })
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 
-  @Post()
-  @ApiResponse({ type: Message })
-  create(@Body() createMessageDto: CreateMessageDto) {
-    return this.messagesService.create(createMessageDto);
+  @Post('/create')
+  @ApiResponse({ type: Message, status: HttpStatus.CREATED })
+  create(
+    @Req() request: RequestWithUser,
+    @Body() createMessageDto: CreateMessageDto,
+  ) {
+    return this.messagesService.create(request.user, createMessageDto);
   }
 
   @Get('')
-  FindAllByDate(@Param('date') date: Date) {
+  findAllByDate(@Param('date') date: Date) {
     return this.messagesService.getAllMessagesByDate(date);
   }
 
-  @Get()
-  findAll() {
-    return this.messagesService.findAll();
+  @Put('/update/:id')
+  update(
+    @Req() request: RequestWithUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateMessageDto: UpdateMessageDto,
+  ) {
+    updateMessageDto.id = id;
+    return this.messagesService.update(request.user, updateMessageDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.messagesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMessageDto: UpdateMessageDto) {
-    return this.messagesService.update(+id, updateMessageDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.messagesService.remove(+id);
+  @Delete('/delete')
+  delete(
+    @Req() request: RequestWithUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.messagesService.softDelete(request.user, id);
   }
 }

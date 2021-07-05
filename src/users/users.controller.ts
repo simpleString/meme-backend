@@ -1,5 +1,8 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOAuth2 } from '@nestjs/swagger';
+import { request } from 'express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { RequestWithUser } from 'src/auth/interfaces/requestWithUser.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 
@@ -8,8 +11,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  // @ApiBearerAuth()
-  getUserInfo() {
-    return 'hello world';
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  getUserInfo(@Req() request: RequestWithUser) {
+    return request.user;
   }
 }

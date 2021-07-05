@@ -23,7 +23,7 @@ import { JwtRefreshStrategy } from './stategies/refresh-jwt.starategy';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_ACCESS_TOKEN_SECRET'),
         signOptions: {
-          expiresIn: '30s',
+          expiresIn: configService.get('JWT_ACCESS_TOKEN_EXP'),
         },
       }),
     }),
