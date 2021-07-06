@@ -1,4 +1,3 @@
-import internal from 'stream';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 enum Gender {

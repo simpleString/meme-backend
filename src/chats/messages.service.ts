@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatsService } from 'src/chats/chats.service';
@@ -12,6 +13,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 import { CreateMessageDto } from './dto/create-message.dto';
+import { UpdateMessageStatusDto } from './dto/update-message-status.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { Message } from './entities/message.entity';
 
@@ -66,13 +68,27 @@ export class MessagesService {
       const message = await this.messageRepository.findOneOrFail({
         where: { user, id: updateMessageDto.messageId },
       });
-      await this.messageRepository.update(message, {
-        text: updateMessageDto.text,
-        status: updateMessageDto.status,
-      });
+      message.text = updateMessageDto.text;
+      await this.messageRepository.save(message);
       return message;
     } catch (error) {
       throw new HttpException("Message don't exist", HttpStatus.NOT_FOUND);
+    }
+  }
+
+  async updateMessageStatus(
+    user: User,
+    updateMessageStatusDto: UpdateMessageStatusDto,
+  ) {
+    try {
+      const message = await this.messageRepository.findOneOrFail({
+        where: { user, id: updateMessageStatusDto.messageId },
+      });
+      message.status = updateMessageStatusDto.status;
+      await this.messageRepository.save(message);
+      return message;
+    } catch (error) {
+      throw new NotFoundException("Message don't exist");
     }
   }
 
@@ -90,6 +106,9 @@ export class MessagesService {
   }
 
   async findMessagesByDate(date: Date, chatId: string) {
+    /**
+     * TODO:: Fix bug with date (needs check time zone!!!)
+     */
     const upperDate = new Date(date.toISOString());
     upperDate.setDate(upperDate.getDate() + 1);
     const messages = await this.messageRepository

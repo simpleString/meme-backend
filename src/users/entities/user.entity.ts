@@ -1,7 +1,7 @@
+import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsMobilePhone } from 'class-validator';
-import { Chat } from 'src/chats/entities/chat.entity';
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -14,6 +14,7 @@ export class User {
 
   @Column()
   @Exclude()
+  @ApiHideProperty()
   password: string;
 
   @Column({ type: 'boolean', default: false })

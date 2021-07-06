@@ -1,14 +1,14 @@
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import {
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+
 import { AuthService } from './auth.service';
 import { AccessTokenDto } from './dto/access-token.dto';
 import { TokensResponseDto } from './dto/tokens-response.dto';
@@ -22,22 +22,22 @@ import { RequestWithUser } from './interfaces/requestWithUser.interface';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @ApiResponse({ type: TokensResponseDto, status: HttpStatus.CREATED })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: Unauthorized })
+  @ApiCreatedResponse({ type: TokensResponseDto })
+  @ApiBadRequestResponse({ type: Unauthorized })
   @Post('/login')
   login(@Body() loginUserDto: CreateUserDto) {
     return this.authService.login(loginUserDto);
   }
 
-  @ApiResponse({ type: TokensResponseDto, status: HttpStatus.CREATED })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, type: Unauthorized })
+  @ApiCreatedResponse({ type: TokensResponseDto })
+  @ApiBadRequestResponse({ type: Unauthorized })
   @Post('/register')
   registration(@Body() createUserDto: CreateUserDto) {
     return this.authService.registration(createUserDto);
   }
 
-  @ApiResponse({ type: AccessTokenDto, status: HttpStatus.OK })
-  @ApiResponse({ type: Unauthorized, status: HttpStatus.UNAUTHORIZED })
+  @ApiOkResponse({ type: AccessTokenDto })
+  @ApiBadRequestResponse({ type: Unauthorized })
   @UseGuards(JwtRefreshAuthGuard)
   @Get('/refresh')
   refresh(
@@ -49,7 +49,7 @@ export class AuthController {
 
   @Get('/logout')
   @ApiBearerAuth()
-  @ApiResponse({ type: Unauthorized, status: HttpStatus.UNAUTHORIZED })
+  @ApiUnauthorizedResponse({ type: Unauthorized })
   @UseGuards(JwtAuthGuard)
   logout(@Req() request: RequestWithUser) {
     this.authService.logout(request.user);

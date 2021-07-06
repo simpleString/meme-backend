@@ -11,6 +11,7 @@ import { MessagesService } from 'src/chats/messages.service';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
+import { ChatIdDto } from './dto/chatId.dto';
 import { Chat } from './entities/chat.entity';
 import { Participant } from './entities/participant.entity';
 
@@ -44,42 +45,13 @@ export class ChatsService {
       await this.participantRepository
         .create({ userId: userId, chatId: chat.id })
         .save();
-      return chat;
+      return chat as ChatIdDto;
     } catch (error) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
   }
 
   async findUsersChat(userAId: string, userBId: string) {
-    // const result = await this.chatRepository
-    //   .createQueryBuilder('chat')
-    //   // .select('chat.id')
-    //   .leftJoin(
-    //     'chat.participants',
-    //     'participant',
-    //     'participant.userId = :userAId',
-    //   )
-    //   .where('participant.userId = :userAId')
-    //   .andWhere((db) => {
-    //     const subQuery = db
-    //       .subQuery()
-    //       .select('participant.chatId')
-    //       .from(Participant, 'participant')
-    //       .where('participant.userId = :userBId')
-    //       .getQuery();
-    //     return 'chat.id IN ' + subQuery;
-    //   })
-    //   // .setParameter('userAId', userAId)
-    //   // .setParameter('userBId', userBId)
-    //   .setParameters({ userBId, userAId })
-    //   .getRawMany();
-
-    // console.log(result);
-
-    // return await this.chatRepository.find({
-    //   where: { id: In(result) },
-    //   relations: ['participants', 'participants.user'],
-    // });
     try {
       const result = await this.chatRepository
         .createQueryBuilder('chat')
@@ -112,17 +84,11 @@ export class ChatsService {
   }
 
   async findAllUserChats(user: User) {
-    // const result = await this.chatRepository
-    //   .createQueryBuilder('chat')
-    //   .select('chat.id')
-    //   .leftJoinAndSelect('chat.participants', 'participant')
-    //   .where('participant.userId = :id', { id: user.id })
-    //   .;
-
     return this.chatRepository
       .createQueryBuilder('chat')
       .leftJoinAndSelect('chat.participants', 'participant')
       .leftJoinAndSelect('participant.user', 'user')
+      .leftJoinAndSelect('chat.lastMsg', 'lastMsg')
       .where((qb) => {
         const subQuery = qb
           .subQuery()

@@ -1,13 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { ApiHideProperty } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateMessageDto {
-  // @ApiProperty()
-  // @IsNotEmpty()
-  // @IsUUID()
+  @ApiHideProperty()
   chatId: string;
 
-  @ApiProperty()
   @IsNotEmpty()
   text: string;
 }

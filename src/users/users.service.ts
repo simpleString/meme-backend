@@ -7,8 +7,9 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostgresErrorCode } from 'src/database/PostgressCodes';
 import { Repository } from 'typeorm';
+
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserActiveDto } from './dto/user-active.dtc';
+import { UserActiveDto } from './dto/user-active.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -57,9 +58,11 @@ export class UsersService {
 
   async updateUserLastActive(userId: string) {
     try {
-      return await this.userRepository.update(userId, {
-        lastActive: new Date(),
+      const user = await this.userRepository.findOneOrFail({
+        where: { id: userId },
       });
+      user.lastActive = new Date();
+      return await this.userRepository.save(user);
     } catch (error) {
       throw new UnauthorizedException();
     }
