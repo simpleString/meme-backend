@@ -18,4 +18,7 @@ export class User {
 
   @Column({ type: 'boolean', default: false })
   isActive: boolean;
+
+  @Column({ type: 'timestamp with time zone', default: new Date() })
+  lastActive: Date;
 }

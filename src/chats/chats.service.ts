@@ -6,8 +6,8 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Message } from 'src/messages/entities/message.entity';
-import { MessagesService } from 'src/messages/messages.service';
+import { Message } from 'src/chats/entities/message.entity';
+import { MessagesService } from 'src/chats/messages.service';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
@@ -27,20 +27,21 @@ export class ChatsService {
   async create(user: User, userId: string) {
     if (user.id === userId)
       throw new HttpException(
-        'User cannot start chat with yourself.',
+        'User cannot start chat with himself.',
         HttpStatus.BAD_REQUEST,
       );
-    let chat: any = await this.findUsersChat(user.id, userId);
-    console.log(chat);
-
+    let chat: Chat;
+    try {
+      chat = await this.findUsersChat(user.id, userId);
+    } catch (err) {}
     if (chat)
       throw new HttpException('Chat already exists', HttpStatus.BAD_REQUEST);
     try {
       chat = await this.chatRepository.create().save();
-      const participantA = await this.participantRepository
+      await this.participantRepository
         .create({ userId: user.id, chatId: chat.id })
         .save();
-      const participantB = await this.participantRepository
+      await this.participantRepository
         .create({ userId: userId, chatId: chat.id })
         .save();
       return chat;
@@ -79,26 +80,29 @@ export class ChatsService {
     //   where: { id: In(result) },
     //   relations: ['participants', 'participants.user'],
     // });
+    try {
+      const result = await this.chatRepository
+        .createQueryBuilder('chat')
+        .innerJoinAndSelect(
+          'chat.participants',
+          'participant',
+          'participant.userId = :userId',
+          { userId: userAId },
+        )
+        .innerJoinAndSelect(
+          'chat.participants',
+          'anotherParticipant',
+          'anotherParticipant.userId = :anotherUserId',
+          { anotherUserId: userBId },
+        )
+        .getOneOrFail();
 
-    const result = await this.chatRepository
-      .createQueryBuilder('chat')
-      .innerJoinAndSelect(
-        'chat.participants',
-        'participant',
-        'participant.userId = :userId',
-        { userId: userAId },
-      )
-      .innerJoinAndSelect(
-        'chat.participants',
-        'anotherParticipant',
-        'anotherParticipant.userId = :anotherUserId',
-        { anotherUserId: userBId },
-      )
-      .getOneOrFail();
-
-    return await this.chatRepository.findOneOrFail(result.id, {
-      relations: ['participants', 'participants.user'],
-    });
+      return await this.chatRepository.findOneOrFail(result.id, {
+        relations: ['participants', 'participants.user', 'lastMsg'],
+      });
+    } catch (error) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
   }
 
   public async updateLastMsgToChat(chatId: string, msg: Message) {
@@ -130,14 +134,5 @@ export class ChatsService {
       })
       .setParameter('userId', user.id)
       .getMany();
-
-    // return this.chatRepository.find({
-    //   where: { id:  },
-    //   relations: ['participants', 'participants.user'],
-    // });
-  }
-
-  getMessagesByDate(date: Date) {
-    this.messagesService.findMessagesByDate;
   }
 }

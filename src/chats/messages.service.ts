@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatsService } from 'src/chats/chats.service';
 import { Participant } from 'src/chats/entities/participant.entity';
@@ -16,6 +22,7 @@ export class MessagesService {
     private readonly messageRepository: Repository<Message>,
     @InjectRepository(Participant)
     private readonly participantRepository: Repository<Participant>,
+    @Inject(forwardRef(() => ChatsService))
     private readonly chatsService: ChatsService,
   ) {}
 
@@ -57,10 +64,12 @@ export class MessagesService {
   async update(user: User, updateMessageDto: UpdateMessageDto) {
     try {
       const message = await this.messageRepository.findOneOrFail({
-        where: { user, id: updateMessageDto.id },
+        where: { user, id: updateMessageDto.messageId },
       });
-      message.text = updateMessageDto.text;
-      await message.save();
+      await this.messageRepository.update(message, {
+        text: updateMessageDto.text,
+        status: updateMessageDto.status,
+      });
       return message;
     } catch (error) {
       throw new HttpException("Message don't exist", HttpStatus.NOT_FOUND);
@@ -72,16 +81,38 @@ export class MessagesService {
       const message = await this.messageRepository.findOneOrFail({
         where: { user, id },
       });
-      await message.softRemove();
+      //TODO:: Change last message when soft delete current last message.
+      await this.chatsService.updateLastMsgToChat(message.chatId, message);
+      return await message.softRemove();
     } catch (error) {
       throw new HttpException("Message don't exist", HttpStatus.NOT_FOUND);
     }
   }
 
   async findMessagesByDate(date: Date, chatId: string) {
+    const upperDate = new Date(date.toISOString());
+    upperDate.setDate(upperDate.getDate() + 1);
+    const messages = await this.messageRepository
+      .createQueryBuilder('message')
+      .where('message.createdAt >= :date', { date })
+      .andWhere('message.createdAt <= :upperDate', { upperDate })
+      .andWhere('message.chatId = :chatId', { chatId })
+      .orderBy('message.createdAt', 'DESC')
+      .getMany();
+    return messages;
+  }
+
+  async findMessagesById(messageId: string, limit = 10) {
+    const message = await this.messageRepository.findOneOrFail({
+      where: { id: messageId },
+    });
     const messages = await this.messageRepository.find({
-      where: { createdAt: date, chatId },
+      where: { chatId: message.chatId },
+      order: { createdAt: 'DESC' },
+      skip: 1,
+      take: limit,
     });
     console.log(messages);
+    return messages;
   }
 }

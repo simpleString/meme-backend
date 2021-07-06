@@ -1,8 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostgresErrorCode } from 'src/database/PostgressCodes';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserActiveDto } from './dto/user-active.dtc';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -38,5 +44,24 @@ export class UsersService {
 
   async getUserById(userId: string) {
     return await this.userRepository.findOne(userId);
+  }
+
+  async getUserLastActive(userId: string) {
+    try {
+      const user = this.userRepository.findOneOrFail({ where: { id: userId } });
+      return { lastActive: (await user).lastActive } as UserActiveDto;
+    } catch (error) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
+  }
+
+  async updateUserLastActive(userId: string) {
+    try {
+      return await this.userRepository.update(userId, {
+        lastActive: new Date(),
+      });
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
   }
 }

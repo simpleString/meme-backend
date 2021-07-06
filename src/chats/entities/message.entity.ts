@@ -14,10 +14,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-enum MessageStatus {
+export enum MessageStatus {
   Unread,
   Read,
-  Deleted,
   Updated,
 }
 
@@ -54,7 +53,7 @@ export class Message extends BaseEntity {
   createdAt: Date;
 
   @ApiProperty()
-  @UpdateDateColumn({ type: 'timestamp with time zone' })
+  @Column({ type: 'timestamp with time zone', nullable: true })
   updatedAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp with time zone' })

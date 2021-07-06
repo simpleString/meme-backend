@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Message } from 'src/messages/entities/message.entity';
+import { Message } from 'src/chats/entities/message.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   BaseEntity,
@@ -26,6 +26,7 @@ export class Chat extends BaseEntity {
   participants: Participant[];
 
   @Column({ nullable: true })
+  @Exclude()
   lastMsgId: string;
 
   @ApiProperty()

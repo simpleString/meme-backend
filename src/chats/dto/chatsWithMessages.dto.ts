@@ -1,4 +1,4 @@
-import { Message } from 'src/messages/entities/message.entity';
+import { Message } from 'src/chats/entities/message.entity';
 
 export class ChatsWithMessagesDto {
   constructor(message: Message) {
