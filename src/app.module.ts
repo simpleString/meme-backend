@@ -1,38 +1,32 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ChatsModule } from './chats/chats.module';
-import { Chat } from './chats/entities/chat.entity';
-
-import { User } from './users/entities/user.entity';
-import { UsersModule } from './users/users.module';
-import { AuthService } from './auth/auth.service';
-import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
-import { MessagesModule } from './messages/messages.module';
-import { Message } from './messages/entities/message.entity';
-import { Token } from './auth/entities/token.entity';
+import { ChatsModule } from './chats/chats.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'backend',
-      entities: [User, Chat, Message, Token],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: 'localhost',
+        port: configService.get<number>('PORT'),
+        username: 'postgres',
+        password: 'postgres',
+        database: 'backend',
+        synchronize: true,
+        autoLoadEntities: true,
+        logging: 'all',
+      }),
     }),
+    ConfigModule.forRoot(),
     UsersModule,
     ChatsModule,
     AuthModule,
-    MessagesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

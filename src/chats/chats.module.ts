@@ -1,14 +1,16 @@
-import { Module } from '@nestjs/common';
-import { ChatsService } from './chats.service';
-import { ChatsController } from './chats.controller';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Message } from 'src/chats/entities/message.entity';
+
+import { ChatsController } from './chats.controller';
+import { ChatsService } from './chats.service';
 import { Chat } from './entities/chat.entity';
-import { UsersModule } from 'src/users/users.module';
-import { Message } from 'src/messages/entities/message.entity';
+import { Participant } from './entities/participant.entity';
+import { MessagesService } from './messages.service';
 
 @Module({
   controllers: [ChatsController],
-  providers: [ChatsService],
-  imports: [TypeOrmModule.forFeature([Chat, Message]), UsersModule],
+  providers: [ChatsService, MessagesService],
+  imports: [TypeOrmModule.forFeature([Chat, Message, Participant])],
 })
 export class ChatsModule {}

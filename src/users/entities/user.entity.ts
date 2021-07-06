@@ -1,17 +1,25 @@
-import { Chat } from 'src/chats/entities/chat.entity';
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ApiHideProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
+import { IsMobilePhone } from 'class-validator';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ unique: true })
+  @IsMobilePhone()
+  phone: string;
 
   @Column()
-  name: string;
-
-  @ManyToMany(() => Chat, (chat) => chat.users)
-  chats: Chat[];
+  @Exclude()
+  @ApiHideProperty()
+  password: string;
 
   @Column({ type: 'boolean', default: false })
   isActive: boolean;
+
+  @Column({ type: 'timestamp with time zone', default: new Date() })
+  lastActive: Date;
 }
