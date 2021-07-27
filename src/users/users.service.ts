@@ -1,22 +1,15 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostgresErrorCode } from 'src/database/PostgressCodes';
 import { Repository } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserActiveDto } from './dto/user-active.dto';
-import { User } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
+import { ONLINE_TIME } from './users.constants';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-  ) {}
+  constructor(@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>) {}
 
   getUsersByIds(users: string[]) {
     return this.userRepository.findByIds(users);
@@ -27,15 +20,9 @@ export class UsersService {
       return await this.userRepository.save(user);
     } catch (error) {
       if (error?.code == PostgresErrorCode.UniqueViolation) {
-        throw new HttpException(
-          'This phone already used',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException('This phone already used', HttpStatus.BAD_REQUEST);
       }
-      throw new HttpException(
-        'Something went wrong',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -47,13 +34,15 @@ export class UsersService {
     return await this.userRepository.findOne(userId);
   }
 
-  async getUserLastActive(userId: string) {
-    try {
-      const user = this.userRepository.findOneOrFail({ where: { id: userId } });
-      return { lastActive: (await user).lastActive } as UserActiveDto;
-    } catch (error) {
-      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-    }
+  async getUserLastActive(userId: string): Promise<Date> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    return user.lastActive;
+  }
+
+  public async IsUserOffline(userId: string): Promise<boolean> {
+    const date = await this.getUserLastActive(userId);
+    const dateNow = new Date();
+    return false ? date.getSeconds() - dateNow.getSeconds() > ONLINE_TIME : true;
   }
 
   async updateUserLastActive(userId: string) {

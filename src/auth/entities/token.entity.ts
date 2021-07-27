@@ -1,15 +1,8 @@
-import { User } from 'src/users/entities/user.entity';
-import {
-  Column,
-  DeleteDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { UserEntity } from 'src/users/entities/user.entity';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Token {
+export class TokenEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -19,9 +12,9 @@ export class Token {
   @Column()
   userId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: UserEntity;
 
   @DeleteDateColumn()
   deletedAt?: Date;

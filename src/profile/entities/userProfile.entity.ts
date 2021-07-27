@@ -7,7 +7,7 @@ enum Gender {
 }
 
 @Entity()
-export class UserProfile {
+export class UserProfileEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -15,11 +15,9 @@ export class UserProfile {
   name: string;
 
   @Column()
-  surname: string;
-
-  @Column()
   age: Number;
 
+  // @ManyToOne()
   @Column({ type: 'enum', enum: Gender })
   gender: Gender;
 }

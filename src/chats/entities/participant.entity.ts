@@ -1,19 +1,12 @@
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { User } from 'src/users/entities/user.entity';
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { UserEntity } from 'src/users/entities/user.entity';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Chat } from './chat.entity';
+import { ChatEntity } from './chat.entity';
 
 @Entity()
-export class Participant extends BaseEntity {
+export class ParticipantEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -22,9 +15,9 @@ export class Participant extends BaseEntity {
   @Exclude()
   userId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: UserEntity;
 
   @ApiHideProperty()
   @Column()
@@ -32,7 +25,7 @@ export class Participant extends BaseEntity {
   chatId: string;
 
   @ApiHideProperty()
-  @ManyToOne(() => Chat)
+  @ManyToOne(() => ChatEntity)
   @JoinColumn({ name: 'chatId' })
-  chat: Chat;
+  chat: ChatEntity;
 }

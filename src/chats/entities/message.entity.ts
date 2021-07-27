@@ -1,7 +1,7 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Chat } from 'src/chats/entities/chat.entity';
-import { User } from 'src/users/entities/user.entity';
+import { ChatEntity } from 'src/chats/entities/chat.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 import {
   BaseEntity,
   Column,
@@ -19,7 +19,7 @@ export enum MessageStatus {
 }
 
 @Entity()
-export class Message extends BaseEntity {
+export class MessageEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -29,10 +29,10 @@ export class Message extends BaseEntity {
   chatId: string;
 
   @ApiHideProperty()
-  @ManyToOne(() => Chat)
+  @ManyToOne(() => ChatEntity)
   @JoinColumn({ name: 'chatId' })
   @Exclude()
-  chat: Chat;
+  chat: ChatEntity;
 
   @ApiHideProperty()
   @Column()
@@ -40,10 +40,10 @@ export class Message extends BaseEntity {
   userId: string;
 
   @ApiHideProperty()
-  @ManyToOne(() => User)
+  @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'userId' })
   @Exclude()
-  user: User;
+  user: UserEntity;
 
   @Column()
   text: string;

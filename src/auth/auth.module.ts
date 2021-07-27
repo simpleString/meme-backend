@@ -4,9 +4,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
+
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { Token } from './entities/token.entity';
+import { TokenEntity } from './entities/token.entity';
 import { JwtStrategy } from './stategies/jwt.strategy';
 import { JwtRefreshStrategy } from './stategies/refresh-jwt.starategy';
 
@@ -27,7 +28,7 @@ import { JwtRefreshStrategy } from './stategies/refresh-jwt.starategy';
         },
       }),
     }),
-    TypeOrmModule.forFeature([Token]),
+    TypeOrmModule.forFeature([TokenEntity]),
   ],
   exports: [AuthService],
 })

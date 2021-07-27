@@ -1,34 +1,27 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatsService } from 'src/chats/chats.service';
-import { Participant } from 'src/chats/entities/participant.entity';
-import { User } from 'src/users/entities/user.entity';
+import { ParticipantEntity } from 'src/chats/entities/participant.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageStatusDto } from './dto/update-message-status.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import { Message } from './entities/message.entity';
+import { MessageEntity } from './entities/message.entity';
 
 @Injectable()
 export class MessagesService {
   constructor(
-    @InjectRepository(Message)
-    private readonly messageRepository: Repository<Message>,
-    @InjectRepository(Participant)
-    private readonly participantRepository: Repository<Participant>,
+    @InjectRepository(MessageEntity)
+    private readonly messageRepository: Repository<MessageEntity>,
+    @InjectRepository(ParticipantEntity)
+    private readonly participantRepository: Repository<ParticipantEntity>,
     @Inject(forwardRef(() => ChatsService))
     private readonly chatsService: ChatsService,
   ) {}
 
-  async create(user: User, createMessageDto: CreateMessageDto) {
+  async create(user: UserEntity, createMessageDto: CreateMessageDto) {
     try {
       const participant = await this.participantRepository.findOneOrFail({
         where: { userId: user.id, chatId: createMessageDto.chatId },
@@ -38,10 +31,7 @@ export class MessagesService {
         user: user,
       });
       await this.messageRepository.save(message);
-      await this.chatsService.updateLastMsgToChat(
-        createMessageDto.chatId,
-        message,
-      );
+      await this.chatsService.updateLastMsgToChat(createMessageDto.chatId, message);
       return message;
     } catch (error) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -63,7 +53,7 @@ export class MessagesService {
     return message;
   }
 
-  async update(user: User, updateMessageDto: UpdateMessageDto) {
+  async update(user: UserEntity, updateMessageDto: UpdateMessageDto) {
     try {
       const message = await this.messageRepository.findOneOrFail({
         where: { user, id: updateMessageDto.messageId },
@@ -76,10 +66,7 @@ export class MessagesService {
     }
   }
 
-  async updateMessageStatus(
-    user: User,
-    updateMessageStatusDto: UpdateMessageStatusDto,
-  ) {
+  async updateMessageStatus(user: UserEntity, updateMessageStatusDto: UpdateMessageStatusDto) {
     try {
       const message = await this.messageRepository.findOneOrFail({
         where: { user, id: updateMessageStatusDto.messageId },
@@ -92,7 +79,7 @@ export class MessagesService {
     }
   }
 
-  async softDelete(user: User, id: string) {
+  async softDelete(user: UserEntity, id: string) {
     try {
       const message = await this.messageRepository.findOneOrFail({
         where: { user, id },
