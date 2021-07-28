@@ -1,6 +1,6 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MessageEntity } from 'src/chats/entities/message.entity';
+import { MessageEntity1 } from 'src/chats/entities/message.entity';
 import { MessagesService } from 'src/chats/messages.service';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -49,7 +49,7 @@ export class ChatsService {
     }
   }
 
-  public async updateLastMsgToChat(chatId: string, msg: MessageEntity) {
+  public async updateLastMsgToChat(chatId: string, msg: MessageEntity1) {
     const chat = await this.chatRepository.findOne(chatId);
     await this.chatRepository.update(chat, { lastMsg: msg });
     return chat;

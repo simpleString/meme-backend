@@ -20,9 +20,9 @@ export class MessageEntity {
   @ManyToOne(() => UserEntity)
   @JoinColumn()
   sender: UserEntity;
-  @Column('enum', { default: MessageStatus.Delivered })
+  @Column('enum', { default: MessageStatus.Delivered, enum: MessageStatus })
   status: MessageStatus;
-  @Column('time with time zone')
+  @Column('timestamp with time zone', { default: new Date() })
   timestamp: Date;
   @ManyToOne(() => AttachmentEntity)
   attachment: AttachmentEntity;

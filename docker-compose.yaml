@@ -1,0 +1,46 @@
+version: "3"
+services:
+
+  server:
+    container_name: server
+    build:
+      context: .
+    env_file:
+      .env
+    ports:
+      - 3000:3000
+    command: npm run start:prod
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: postgres
+    image: postgres:12
+    ports:
+    - "5432:5432"
+    volumes:
+    - /data/postgres:/data/postgres
+    env_file:
+    - .env
+    restart: always
+
+  nginx:
+    image: nginx:1.19-alpine
+    volumes:
+            - ./data/nginx_coursehelper.ddns.net:/etc/nginx/conf.d
+            - ./data/certbot/conf:/etc/letsencrypt
+            - ./data/certbot/www:/var/www/certbot
+    restart: always
+    ports:
+    - 80:80
+    - 443:443
+    depends_on:
+    - server
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+  certbot:
+        image: certbot/certbot
+        restart: always
+        volumes:
+            - ./data/certbot/conf:/etc/letsencrypt
+            - ./data/certbot/www:/var/www/certbot
+        entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"

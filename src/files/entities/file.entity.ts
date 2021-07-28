@@ -10,7 +10,7 @@ export enum LoadingStatus {
 export class FileEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column('enum', { default: LoadingStatus.Loading })
+  @Column('enum', { default: LoadingStatus.Loading, enum: LoadingStatus })
   loadingStatus: LoadingStatus;
   @Column()
   key: string;

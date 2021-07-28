@@ -11,7 +11,7 @@ export enum AttachmentType {
 export class AttachmentEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column('enum', { default: AttachmentType.Photo })
+  @Column('enum', { default: AttachmentType.Photo, enum: AttachmentType })
   type: AttachmentType;
   @ManyToOne(() => FileEntity)
   content: FileEntity;

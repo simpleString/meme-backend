@@ -1,15 +1,30 @@
-import { IsUUID } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 import { AttachmentType } from 'src/files/entities/attachment.entity';
+
+// FIXME: This shit don't work. Needs fix!!!
+export class AttachmentDto {
+  type: AttachmentType;
+
+  @ApiProperty({ description: 'If AttachmentType is id from system, pass it to content.' })
+  @IsUUID()
+  memeId?: string;
+}
 
 export class CreateMessageDto {
   @IsUUID()
   userId: string;
 
+  @IsNotEmpty()
   text: string;
 
-  //   TODO:: Check validation unions and nested objs.
-  attachment: {
-    type: AttachmentType;
-    content: string | Buffer;
-  };
+  // @ValidateNested()
+  // @IsDefined()
+  // @IsNotEmptyObject()
+  // @IsObject()
+  // @Type(() => AttachmentDto)
+  attachment?: AttachmentDto;
+
+  @ApiProperty({ type: 'file', format: 'binary' })
+  file?: Express.Multer.File;
 }

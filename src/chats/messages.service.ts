@@ -8,13 +8,13 @@ import { Repository } from 'typeorm';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageStatusDto } from './dto/update-message-status.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import { MessageEntity } from './entities/message.entity';
+import { MessageEntity1 } from './entities/message.entity';
 
 @Injectable()
 export class MessagesService {
   constructor(
-    @InjectRepository(MessageEntity)
-    private readonly messageRepository: Repository<MessageEntity>,
+    @InjectRepository(MessageEntity1)
+    private readonly messageRepository: Repository<MessageEntity1>,
     @InjectRepository(ParticipantEntity)
     private readonly participantRepository: Repository<ParticipantEntity>,
     @Inject(forwardRef(() => ChatsService))

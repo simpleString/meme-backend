@@ -19,7 +19,7 @@ export enum MessageStatus {
 }
 
 @Entity()
-export class MessageEntity extends BaseEntity {
+export class MessageEntity1 extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

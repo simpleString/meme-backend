@@ -1,5 +1,17 @@
-import { Body, Controller, DefaultValuePipe, Get, ParseIntPipe, ParseUUIDPipe, Post, Query } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  ParseIntPipe,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiQuery } from '@nestjs/swagger';
 import { BaseAuth } from 'src/auth/decorators/baseAuth.decorator';
 import { User } from 'src/auth/decorators/user.decorator';
 import { MessagesService } from 'src/messages/messages.service';
@@ -26,8 +38,18 @@ export class MessagesController {
     return this.messagesService.getMessages(searchMessageDto);
   }
 
+  // FIXME:: Fix file uploading
   @Post()
-  sendMessage(@User() user: UserEntity, @Body() createMessageDto: CreateMessageDto) {
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  sendMessage(
+    @User() user: UserEntity,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createMessageDto: CreateMessageDto,
+  ) {
+    createMessageDto.file = file;
+    console.log(createMessageDto);
+
     return this.messagesService.createMessage(user, createMessageDto);
   }
 }

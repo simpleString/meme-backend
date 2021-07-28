@@ -1,6 +1,6 @@
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { MessageEntity } from 'src/chats/entities/message.entity';
+import { MessageEntity1 } from 'src/chats/entities/message.entity';
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { ParticipantEntity } from './participant.entity';
@@ -18,7 +18,7 @@ export class ChatEntity extends BaseEntity {
   @Exclude()
   lastMsgId: string;
 
-  @ManyToOne(() => MessageEntity, { nullable: true })
+  @ManyToOne(() => MessageEntity1, { nullable: true })
   @JoinColumn({ name: 'lastMsgId' })
-  lastMsg: MessageEntity;
+  lastMsg: MessageEntity1;
 }
