@@ -1,6 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { FileEntity } from 'src/files/entities/file.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-enum Gender {
+export enum Gender {
   female,
   male,
   none,
@@ -15,9 +17,23 @@ export class UserProfileEntity {
   name: string;
 
   @Column()
-  age: Number;
+  age: number;
 
-  // @ManyToOne()
+  @Column()
+  userId: string;
+
+  @ManyToOne(() => UserEntity)
+  @JoinColumn()
+  user: UserEntity;
+
   @Column({ type: 'enum', enum: Gender })
   gender: Gender;
+
+  @Column()
+  bio: string;
+
+  @OneToMany(() => FileEntity, (photo) => photo.userProfile)
+  photos: FileEntity[];
+  // @Column()
+  // location: Geometry;
 }

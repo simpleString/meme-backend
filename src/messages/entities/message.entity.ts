@@ -1,5 +1,5 @@
 import { ApiHideProperty } from '@nestjs/swagger';
-import { AttachmentEntity } from 'src/files/entities/attachment.entity';
+import { FileEntity } from 'src/files/entities/file.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -24,6 +24,6 @@ export class MessageEntity {
   status: MessageStatus;
   @Column('timestamp with time zone', { default: new Date() })
   timestamp: Date;
-  @ManyToOne(() => AttachmentEntity)
-  attachment: AttachmentEntity;
+  @ManyToOne(() => FileEntity)
+  attachment: FileEntity;
 }

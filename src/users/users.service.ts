@@ -39,10 +39,10 @@ export class UsersService {
     return user.lastActive;
   }
 
-  public async IsUserOffline(userId: string): Promise<boolean> {
+  public async isUserOnline(userId: string): Promise<boolean> {
     const date = await this.getUserLastActive(userId);
     const dateNow = new Date();
-    return false ? date.getSeconds() - dateNow.getSeconds() > ONLINE_TIME : true;
+    return true ? dateNow.getSeconds() - date.getSeconds() < ONLINE_TIME : false;
   }
 
   async updateUserLastActive(userId: string) {

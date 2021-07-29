@@ -1,46 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { S3 } from 'aws-sdk';
 import { Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
-import { AttachmentEntity, AttachmentType } from './entities/attachment.entity';
-import { FileEntity } from './entities/file.entity';
+import { AttachmentType, FileEntity } from './entities/file.entity';
 
 @Injectable()
 export class FilesService {
   private s3: S3;
 
   constructor(
-    @InjectRepository(AttachmentEntity) private readonly attachmentRepository: Repository<AttachmentEntity>,
     @InjectRepository(FileEntity) private readonly fileRepository: Repository<FileEntity>,
     private readonly configService: ConfigService,
   ) {
-    this.s3 = new S3();
+    this.s3 = new S3({ endpoint: 'http://localhost:9000' });
   }
 
   public async createAttachment(attachmentType: AttachmentType, file: Buffer, mimeType: string, fileName: string) {
-    let bucketName: string;
-    switch (attachmentType) {
-      case AttachmentType.Meme:
-        bucketName = this.configService.get('AWS_MEME_BUCKET');
-        break;
-      case AttachmentType.Photo:
-        bucketName = this.configService.get('AWS_PHOTO_BUCKET');
-        break;
-    }
+    const bucketName = this.getBucketNameByAttachmentType(attachmentType);
     const fileExtension = fileName.split('.').pop();
     const newName = uuid() + '.' + fileExtension;
     const result = await this.uploadFile(bucketName, file, mimeType, newName);
-    const fileEntity = this.fileRepository.create({ key: result.Key });
+    const fileEntity = this.fileRepository.create({ key: result.Key, type: attachmentType });
     await this.fileRepository.save(fileEntity);
-    const attachment = this.attachmentRepository.create({ content: fileEntity, type: attachmentType });
-    await this.attachmentRepository.save(attachment);
-    return attachment;
+    return fileEntity;
   }
 
-  private async downloadFile(bucket: string, key: string) {
+  private getBucketNameByAttachmentType(attachmentType: AttachmentType): string {
+    switch (attachmentType) {
+      case AttachmentType.Meme:
+        return this.configService.get('AWS_MEME_BUCKET');
+      case AttachmentType.Photo:
+        return this.configService.get('AWS_PHOTO_BUCKET');
+    }
+  }
+
+  public async generateFileUrlById(fileId: string) {
+    const file = await this.fileRepository.findOne(fileId);
+    if (!file) throw new NotFoundException('File not found.');
+    return await this.generateFileUrl(this.getBucketNameByAttachmentType(file.type), file.key);
+  }
+
+  private async generateFileUrl(bucket: string, key: string) {
     const fileUrl = await this.s3.getSignedUrlPromise('getObject', { Key: key, Bucket: bucket });
     return fileUrl;
   }

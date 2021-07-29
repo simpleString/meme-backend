@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsUUID } from 'class-validator';
-import { AttachmentType } from 'src/files/entities/attachment.entity';
+import { AttachmentType } from 'src/files/entities/file.entity';
 
 // FIXME: This shit don't work. Needs fix!!!
 export class AttachmentDto {

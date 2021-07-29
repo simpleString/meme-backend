@@ -17,6 +17,8 @@ async function bootstrap() {
   AWSConfig.update({
     accessKeyId: configService.get('AWS_ACCESS_KEY_ID'),
     secretAccessKey: configService.get('AWS_SECRET_ACCESS_KEY'),
+    s3ForcePathStyle: true,
+    signatureVersion: 'v4',
   });
 
   const config = new DocumentBuilder()

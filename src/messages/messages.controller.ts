@@ -44,7 +44,7 @@ export class MessagesController {
   @ApiConsumes('multipart/form-data')
   sendMessage(
     @User() user: UserEntity,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file:         Express.Multer.File,
     @Body() createMessageDto: CreateMessageDto,
   ) {
     createMessageDto.file = file;

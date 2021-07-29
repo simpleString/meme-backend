@@ -18,7 +18,7 @@ export class UserEntity {
   password: string;
 
   @Column({ type: 'boolean', default: false })
-  isActive: boolean;
+  isActivated: boolean;
 
   @Column({ type: 'timestamp with time zone', default: new Date() })
   lastActive: Date;
