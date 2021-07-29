@@ -1,6 +1,7 @@
+import { Point } from 'geojson';
 import { FileEntity } from 'src/files/entities/file.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Gender {
   female,
@@ -32,8 +33,15 @@ export class UserProfileEntity {
   @Column()
   bio: string;
 
-  @OneToMany(() => FileEntity, (photo) => photo.userProfile)
+  @OneToMany(() => FileEntity, (file) => file.userProfile)
   photos: FileEntity[];
-  // @Column()
-  // location: Geometry;
+
+  @Index({ spatial: true })
+  @Column({
+    type: 'geography',
+    spatialFeatureType: 'Point',
+    srid: 4326,
+    nullable: true,
+  })
+  location: Point;
 }

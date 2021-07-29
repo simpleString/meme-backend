@@ -18,6 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         logging: 'all',
         // autoLoadEntities: true,
         entities: [__dirname + '/../**/*.entity.ts', 'dist/**/*.entity{ .ts,.js}'],
+        keepConnectionAlive: true,
       }),
     }),
   ],

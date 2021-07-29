@@ -14,7 +14,7 @@ export class MessageEntity {
   id: string;
   @Column()
   text: string;
-  @Column('uuid')
+  @Column('string')
   senderId: string;
   @ApiHideProperty()
   @ManyToOne(() => UserEntity)
