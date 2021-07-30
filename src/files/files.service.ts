@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { S3 } from 'aws-sdk';
-import stream, { PassThrough, Readable } from 'stream';
+import stream, { PassThrough } from 'stream';
 import { Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
@@ -31,7 +31,7 @@ export class FilesService {
 
   public async createAttachmentStream(
     attachmentType: AttachmentType,
-    file: Express.Multer.File,
+    file: NodeJS.ReadableStream,
     mimeType: string,
     fileName: string,
   ) {
@@ -40,14 +40,14 @@ export class FilesService {
     const fileExtension = fileName.split('.').pop();
     const newName = uuid() + '.' + fileExtension;
 
-    const fileStream = Readable.from(file.buffer);
+    // const fileStream = Readable.from(file.buffer);
 
     console.log(newName);
 
     const { result, writeStream } = this.uploadFromStream(bucketName, mimeType, newName);
     console.log(result, writeStream);
 
-    const pipeLine = fileStream.pipe(writeStream);
+    const pipeLine = file.pipe(writeStream);
     let recivedData: S3.ManagedUpload.SendData;
     try {
       recivedData = await result;

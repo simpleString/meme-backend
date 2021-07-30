@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AttachmentType } from 'src/files/entities/file.entity';
+import { IFileStream } from 'src/files/files.enterfaces';
 import { FilesService } from 'src/files/files.service';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
@@ -18,28 +19,29 @@ export class ProfileService {
   editProfile() {
     throw new Error('Method not implemented.');
   }
-  async addPhotos(addProfilePhotoDto: AddProfilePhotoDto, busboy: Array<Express.Multer.File>) {
-    return await Promise.all(
-      busboy.map(async (file) => {
-        const contents = await this._filesService.createAttachmentStream(
-          AttachmentType.Photo,
-          file,
-          file.mimetype,
-          file.originalname,
-        );
-        console.log(contents);
-        return contents;
-      }),
+  async addPhoto(addProfilePhotoDto: AddProfilePhotoDto, file: IFileStream) {
+    const content = await this._filesService.createAttachmentStream(
+      AttachmentType.Photo,
+      file.file,
+      file.mimeType,
+      file.fileName,
     );
-    busboy.forEach(async (file) => {
-      console.log(file);
-      return await this._filesService.createAttachmentStream(
-        AttachmentType.Photo,
-        file,
-        file.mimetype,
-        file.originalname,
-      );
-    });
+    console.log(content);
+    return content;
+    // return await Promise.all(
+    //   files.map(async (file) => {
+
+    //   }),
+    // );
+    // busboy.forEach(async (file) => {
+    //   console.log(file);
+    //   return await this._filesService.createAttachmentStream(
+    //     AttachmentType.Photo,
+    //     file,
+    //     file.mimetype,
+    //     file.originalname,
+    //   );
+    // });
   }
   constructor(
     @InjectRepository(UserProfileEntity) private readonly _userProfileRepository: Repository<UserProfileEntity>,
