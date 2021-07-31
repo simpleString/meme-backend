@@ -1,5 +1,5 @@
 import { ApiHideProperty } from '@nestjs/swagger';
-import { FileEntity } from 'src/files/entities/file.entity';
+import { FileEntity } from 'src/providers/files/entities/file.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 

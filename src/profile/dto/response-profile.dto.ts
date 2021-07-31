@@ -1,4 +1,4 @@
-import { LoadingStatus } from 'src/files/entities/file.entity';
+import { LoadingStatus } from 'src/providers/files/entities/file.entity';
 
 export class ResponseProfileDto {
   id: string;

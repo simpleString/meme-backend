@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatsService } from 'src/chats/chats.service';
 import { ParticipantEntity } from 'src/chats/entities/participant.entity';
-import { FilesService } from 'src/files/files.service';
+import { FilesService } from 'src/providers/files/files.service';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 

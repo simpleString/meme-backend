@@ -1,25 +1,29 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { EmailService } from 'src/providers/email/email.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 
 import { AccessTokenDto } from './dto/access-token.dto';
+import { ConfirmationCodeEntity } from './entities/confirmationCode.entity';
 import { TokenEntity } from './entities/token.entity';
 import { IAccessTokenPayload, IRefreshTokenPayload } from './interfaces/tokenPayload.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(TokenEntity)
-    private readonly tokenRepository: Repository<TokenEntity>,
+    @InjectRepository(TokenEntity) private readonly tokenRepository: Repository<TokenEntity>,
+    @InjectRepository(ConfirmationCodeEntity)
+    private readonly confirmationCodeRepository: Repository<ConfirmationCodeEntity>,
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async registration(createUserDto: CreateUserDto) {
@@ -30,7 +34,13 @@ export class AuthService {
       ...createUserDto,
       password: hashedPassword,
     });
-    return await this.generateTokens(user);
+
+    const confirmationCode = this.generateConfirmationCode();
+    const confirmationCodeInstance = this.confirmationCodeRepository.create({ code: confirmationCode, user });
+    await this.confirmationCodeRepository.save(confirmationCodeInstance);
+
+    await this.emailService.sendComfirmation(confirmationCode);
+    // return await this.generateTokens(user);
   }
 
   async login(loginUserDto: CreateUserDto) {
@@ -40,8 +50,27 @@ export class AuthService {
     }
     if (!(await bcrypt.compare(loginUserDto.password, user.password)))
       throw new HttpException("Phone or password don't match", HttpStatus.BAD_REQUEST);
+    if (!user.isActivated) throw new BadRequestException('User not activated.');
     return await this.generateTokens(user);
   }
+
+  async confirmRegistrationCode(userData: CreateUserDto, code: number) {
+    const user = await this.usersService.getUserByPhone(userData.phone);
+    if (!user) throw new NotFoundException('User not found.');
+    if (!(await bcrypt.compare(userData.password, user.password)))
+      throw new BadRequestException("Phone or password don't match");
+
+    const confirmationCode = await this.confirmationCodeRepository.findOne({
+      where: { code, user },
+      order: { createdAt: 'DESC' },
+    });
+    console.log(confirmationCode, code);
+    if (code === confirmationCode?.code) {
+      return await this.usersService.activateUser(user);
+    }
+    throw new BadRequestException('Confirmation code do not match.');
+  }
+  private generateConfirmationCode = () => Math.floor(100000 + Math.random() * 900000);
 
   async logout(user: UserEntity) {
     const refreshToken = await this.tokenRepository.findOne({

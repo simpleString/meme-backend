@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AttachmentType } from 'src/files/entities/file.entity';
-import { IFileStream } from 'src/files/files.enterfaces';
-import { FilesService } from 'src/files/files.service';
+import { AttachmentType } from 'src/providers/files/entities/file.entity';
+import { IFileStream } from 'src/providers/files/files.enterfaces';
+import { FilesService } from 'src/providers/files/files.service';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 

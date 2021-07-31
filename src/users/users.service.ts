@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PostgresErrorCode } from 'src/database/PostgressCodes';
+import { PostgresErrorCode } from 'src/providers/database/PostgressCodes';
 import { Repository } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
@@ -45,15 +45,18 @@ export class UsersService {
     return true ? dateNow.getSeconds() - date.getSeconds() < ONLINE_TIME : false;
   }
 
-  async updateUserLastActive(userId: string) {
-    try {
-      const user = await this.userRepository.findOneOrFail({
-        where: { id: userId },
-      });
-      user.lastActive = new Date();
-      return await this.userRepository.save(user);
-    } catch (error) {
-      throw new UnauthorizedException();
-    }
+  async guardUser(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) throw new UnauthorizedException();
+    if (!user.isActivated) throw new UnauthorizedException('User not activated.');
+    user.lastActive = new Date();
+    return await this.userRepository.save(user);
+  }
+
+  async activateUser(user: UserEntity) {
+    user.isActivated = true;
+    return await this.userRepository.save(user);
   }
 }

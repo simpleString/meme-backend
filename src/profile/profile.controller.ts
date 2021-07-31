@@ -2,8 +2,9 @@ import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Req } f
 import { ApiConsumes } from '@nestjs/swagger';
 import { ManagedUpload } from 'aws-sdk/clients/s3';
 import { Request } from 'express';
+import { BaseAuth } from 'src/auth/decorators/baseAuth.decorator';
 import { User } from 'src/auth/decorators/user.decorator';
-import { IFileStream } from 'src/files/files.enterfaces';
+import { IFileStream } from 'src/providers/files/files.enterfaces';
 import { UserEntity } from 'src/users/entities/user.entity';
 
 import { AddProfilePhotoDto } from './dto/add-profile-photo.dto';
@@ -13,7 +14,7 @@ import { ProfileService } from './profile.service';
 
 const Busboy = require('busboy');
 @Controller('profile')
-// @BaseAuth('profile')
+@BaseAuth('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 

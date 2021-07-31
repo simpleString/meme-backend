@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -40,10 +40,7 @@ export class AuthController {
   @ApiBadRequestResponse({ type: Unauthorized })
   @UseGuards(JwtRefreshAuthGuard)
   @Get('/refresh')
-  refresh(
-    @Req() request: RequestWithUser,
-    @Body('refresh_token') refreshToken: string,
-  ) {
+  refresh(@Req() request: RequestWithUser, @Body('refresh_token') refreshToken: string) {
     return this.authService.refreshAccessToken(request.user, refreshToken);
   }
 
@@ -53,5 +50,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   logout(@Req() request: RequestWithUser) {
     this.authService.logout(request.user);
+  }
+
+  @Post('/confirm/:code')
+  confirmRegistrationCode(@Body() loginUserDto: CreateUserDto, @Param('code', ParseIntPipe) code: number) {
+    return this.authService.confirmRegistrationCode(loginUserDto, code);
   }
 }

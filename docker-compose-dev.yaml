@@ -1,26 +1,26 @@
-version: "3"
+version: '3'
 services:
-    db:
-        image: kartoza/postgis:13.0
-        # user: "${UID}" # Needs set current user or existing user!!!
-        volumes:
-            - ./pgdata:/var/lib/postgresql/data
-        restart: always
-        environment:
-            POSTGRES_DB: postgres
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-        ports: 
-            - 5432:5432
-    minio:
-        image: minio/minio
-        volumes:
-            - ./s3/data:/data
-        ports: 
-            - '9001:9001'
-            - '9000:9000'
-        command: server /data --console-address ":9001"
-        environment:
-            MINIO_ACCESS_KEY: minioadmin
-            MINIO_SECRET_KEY: minioadmin
-
+  db:
+    image: kartoza/postgis:13.0
+    # user: "${UID}" # Needs set current user or existing user!!!
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+  minio:
+    image: minio/minio
+    volumes:
+      - ./s3/data:/data
+    restart: always
+    ports:
+      - '9001:9001'
+      - '9000:9000'
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin

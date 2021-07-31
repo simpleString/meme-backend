@@ -1,5 +1,5 @@
 import { Point } from 'geojson';
-import { FileEntity } from 'src/files/entities/file.entity';
+import { FileEntity } from 'src/providers/files/entities/file.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
