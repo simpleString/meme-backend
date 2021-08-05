@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -11,6 +11,7 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 import { AuthService } from './auth.service';
 import { AccessTokenDto } from './dto/access-token.dto';
+import { ConfirmCodeDto } from './dto/confirm-code.dto';
 import { TokensResponseDto } from './dto/tokens-response.dto';
 import { Unauthorized } from './dto/unauthorized.dto';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh.guard';
@@ -52,8 +53,8 @@ export class AuthController {
     this.authService.logout(request.user);
   }
 
-  @Post('/confirm/:code')
-  confirmRegistrationCode(@Body() loginUserDto: CreateUserDto, @Param('code', ParseIntPipe) code: number) {
-    return this.authService.confirmRegistrationCode(loginUserDto, code);
+  @Post('/confirm')
+  confirmRegistrationCode(@Body() confirmCodeDto: ConfirmCodeDto) {
+    return this.authService.confirmRegistrationCode(confirmCodeDto);
   }
 }

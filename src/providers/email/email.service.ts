@@ -4,11 +4,11 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailService: MailerService, private readonly configSerivice: ConfigService) {}
+  constructor(private readonly mailService: MailerService, private readonly configService: ConfigService) {}
 
-  async sendComfirmation(code: number) {
+  async sendConfirmation(code: number) {
     await this.mailService.sendMail({
-      to: this.configSerivice.get('TEST_CONFIRMAION_MAIL'),
+      to: this.configService.get('TEST_CONFIRMATION_MAIL'),
       subject: 'Confirm your phone!',
       template: './confirmation',
       context: {

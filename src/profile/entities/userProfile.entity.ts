@@ -1,7 +1,7 @@
 import { Point } from 'geojson';
 import { FileEntity } from 'src/providers/files/entities/file.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Gender {
   female,
@@ -23,7 +23,7 @@ export class UserProfileEntity {
   @Column()
   userId: string;
 
-  @ManyToOne(() => UserEntity)
+  @OneToOne(() => UserEntity)
   @JoinColumn()
   user: UserEntity;
 

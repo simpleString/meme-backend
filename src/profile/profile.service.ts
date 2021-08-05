@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FileResponseDto } from 'src/common/dto/file-response.dto';
 import { AttachmentType } from 'src/providers/files/entities/file.entity';
 import { IFileStream } from 'src/providers/files/files.enterfaces';
 import { FilesService } from 'src/providers/files/files.service';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
-
-import { AddProfilePhotoDto } from './dto/add-profile-photo.dto';
 import { CreateProfileDto } from './dto/create-profile.dto';
+import { EditProfileDto } from './dto/edit-profile-photo.dto';
 import { ResponseProfileDto } from './dto/response-profile.dto';
 import { UserProfileEntity } from './entities/userProfile.entity';
 
@@ -16,33 +16,7 @@ export class ProfileService {
   deleteProfilePhoto() {
     throw new Error('Method not implemented.');
   }
-  editProfile() {
-    throw new Error('Method not implemented.');
-  }
-  async addPhoto(addProfilePhotoDto: AddProfilePhotoDto, file: IFileStream) {
-    const content = await this._filesService.createAttachmentStream(
-      AttachmentType.Photo,
-      file.file,
-      file.mimeType,
-      file.fileName,
-    );
-    console.log(content);
-    return content;
-    // return await Promise.all(
-    //   files.map(async (file) => {
 
-    //   }),
-    // );
-    // busboy.forEach(async (file) => {
-    //   console.log(file);
-    //   return await this._filesService.createAttachmentStream(
-    //     AttachmentType.Photo,
-    //     file,
-    //     file.mimetype,
-    //     file.originalname,
-    //   );
-    // });
-  }
   constructor(
     @InjectRepository(UserProfileEntity) private readonly _userProfileRepository: Repository<UserProfileEntity>,
     private readonly _usersService: UsersService,
@@ -79,5 +53,16 @@ export class ProfileService {
     const profile = this._userProfileRepository.create(createProfileDto);
     await this._userProfileRepository.save(profile);
     return profile;
+  }
+
+  async editProfile(editProfileDto: EditProfileDto, userId: string) {
+    const updateQuery = await this._userProfileRepository.update(userId, editProfileDto);
+  }
+
+  async addPhoto(userId: string, file: IFileStream): Promise<FileResponseDto> {
+    const content = await this._filesService.createAttachmentStream(AttachmentType.Photo, file.file);
+    const urls = await this._filesService.generateFileUrlById(content.id);
+    const result: FileResponseDto = { id: content.id, url: urls[0], thumbnail_url: urls[1] };
+    return result;
   }
 }

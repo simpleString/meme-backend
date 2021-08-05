@@ -10,6 +10,7 @@ import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 
 import { AccessTokenDto } from './dto/access-token.dto';
+import { ConfirmCodeDto } from './dto/confirm-code.dto';
 import { ConfirmationCodeEntity } from './entities/confirmationCode.entity';
 import { TokenEntity } from './entities/token.entity';
 import { IAccessTokenPayload, IRefreshTokenPayload } from './interfaces/tokenPayload.interface';
@@ -39,7 +40,7 @@ export class AuthService {
     const confirmationCodeInstance = this.confirmationCodeRepository.create({ code: confirmationCode, user });
     await this.confirmationCodeRepository.save(confirmationCodeInstance);
 
-    await this.emailService.sendComfirmation(confirmationCode);
+    await this.emailService.sendConfirmation(confirmationCode);
     // return await this.generateTokens(user);
   }
 
@@ -54,22 +55,22 @@ export class AuthService {
     return await this.generateTokens(user);
   }
 
-  async confirmRegistrationCode(userData: CreateUserDto, code: number) {
+  async confirmRegistrationCode(userData: ConfirmCodeDto) {
     const user = await this.usersService.getUserByPhone(userData.phone);
     if (!user) throw new NotFoundException('User not found.');
     if (!(await bcrypt.compare(userData.password, user.password)))
       throw new BadRequestException("Phone or password don't match");
 
     const confirmationCode = await this.confirmationCodeRepository.findOne({
-      where: { code, user },
+      where: { code: userData.code, user },
       order: { createdAt: 'DESC' },
     });
-    console.log(confirmationCode, code);
-    if (code === confirmationCode?.code) {
+    if (confirmationCode) {
       return await this.usersService.activateUser(user);
     }
     throw new BadRequestException('Confirmation code do not match.');
   }
+
   private generateConfirmationCode = () => Math.floor(100000 + Math.random() * 900000);
 
   async logout(user: UserEntity) {
