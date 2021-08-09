@@ -16,7 +16,7 @@ export enum AttachmentType {
 export class FileEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column('enum', { default: LoadingStatus.Loading, enum: LoadingStatus })
+  @Column('enum', { default: LoadingStatus.Done, enum: LoadingStatus })
   loadingStatus: LoadingStatus;
   @Column()
   key: string;

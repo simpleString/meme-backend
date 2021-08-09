@@ -36,12 +36,12 @@ export class ProfileService {
       bio: userProfile.bio,
       isOnline: isUserOnline,
       name: userProfile.name,
-      photos: userProfile.photos.map((photo) => {
+      photos: userProfile.photos.map(async (photo) => {
         return {
           id: photo.id,
           loadingStatus: photo.loadingStatus,
-          url: 'fsd',
-          urlLowQuality: 'fds',
+          url: await this._filesService.generateFileUrlById(photo.key),
+          urlLowQuality: await this._filesService.generateFileUrlById(photo.key),
         };
       }),
       distance: 1,
@@ -62,7 +62,12 @@ export class ProfileService {
   async addPhoto(userId: string, file: IFileStream): Promise<FileResponseDto> {
     const content = await this._filesService.createAttachmentStream(AttachmentType.Photo, file.file);
     const urls = await this._filesService.generateFileUrlById(content.id);
-    const result: FileResponseDto = { id: content.id, url: urls[0], thumbnail_url: urls[1] };
+    const result: FileResponseDto = {
+      id: content.id,
+      url: urls[0],
+      thumbnail_url: urls[1],
+      loadingStatus: content.loadingStatus,
+    };
     return result;
   }
 }
